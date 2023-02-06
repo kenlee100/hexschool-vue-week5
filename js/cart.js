@@ -4,16 +4,16 @@
 // 購物車列表 ✓
 // 刪除購物車項目（單一、全部） ✓
 // 調整購物車產品數量 ✓
-// vue-loading
+// vue-loading ✓
 // 結帳付款
 
-// 細節調整：modal預設數量、數量調整
-let path = "ken100";
 import config from "./config.js";
 import useProductModal from "./userProductModal.js";
+// import loading from "./vueLoading.js";
 const app = Vue.createApp({
   data() {
     return {
+      isLoading: false,
       loadingStatus: {
         loadingItem: "",
       },
@@ -21,6 +21,7 @@ const app = Vue.createApp({
       tempProduct: {
         imagesUrl: [],
       },
+      productId: "",
       cart: {},
     };
   },
@@ -34,26 +35,33 @@ const app = Vue.createApp({
         .get(`${config.url}/api/${config.path}/products`)
         .then((res) => {
           this.products = res.data.products;
+          this.isLoading = false;
           console.log(res);
         })
         .catch((err) => {
           alert(`${err.data.message}`);
         });
     },
-    // 取得單筆商品資訊
-    getProductItem(id) {
-      // 將商品id寫入讀取狀態內容
+    openModal(id) {
       this.loadingStatus.loadingItem = id;
-      axios
-        .get(`${config.url}/api/${config.path}/product/${id}`)
-        .then((res) => {
-          this.tempProduct = res.data.product;
-          this.loadingStatus.loadingItem = "";
-        })
-        .catch((err) => {
-          alert(`${err.data.message}`);
-        });
+      this.productId = id;
+      console.log("productId 外層傳入", id);
     },
+    // 取得單筆商品資訊
+    // getProductItem(id) {
+    //   // 將商品id寫入讀取狀態內容
+    //   this.loadingStatus.loadingItem = id;
+    //   axios
+    //     .get(`${config.url}/api/${config.path}/product/${id}`)
+    //     .then((res) => {
+    //       this.loadingStatus.loadingItem = "";
+    //       this.tempProduct = res.data.product;
+    //       this.$refs.modal.openModal(id);
+    //     })
+    //     .catch((err) => {
+    //       alert(`${err.data.message}`);
+    //     });
+    // },
     // 加入購物車
     addCart(content, qty = 1) {
       this.loadingStatus.loadingItem = content.id;
@@ -164,16 +172,23 @@ const app = Vue.createApp({
     async viewProduct(id) {
       //   console.log(1);
       await this.getProductItem(id);
-      this.$refs.modal.openModal();
+      console.log(Object.keys(this.tempProduct).length > 1);
+      // if (Object.keys(this.tempProduct).length > 1) {
+      //   this.$refs.modal.openModal();
+      // }
       //   console.log(2);
       //   console.log(3);
     },
   },
   mounted() {
+    this.isLoading = true;
     this.getProducts();
     this.getCartList();
   },
 });
+console.log(VueLoading);
+// app.use(VueLoading.LoadingPlugin);
+app.component("loading", VueLoading.Component);
 app.component("VForm", VeeValidate.Form);
 app.component("VField", VeeValidate.Field);
 app.component("ErrorMessage", VeeValidate.ErrorMessage);
