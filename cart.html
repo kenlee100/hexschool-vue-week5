@@ -89,7 +89,7 @@ https://cdn.jsdelivr.net/npm/vue-loading-overlay@6/dist/css/index.css
                     <button
                       type="button"
                       class="btn btn-outline-secondary"
-                      @click="openModal(item.id)"
+                      @click="openModal(item)"
                       :disabled="loadingStatus.loadingItem===item.id"
                     >
                       <i
@@ -200,21 +200,26 @@ https://cdn.jsdelivr.net/npm/vue-loading-overlay@6/dist/css/index.css
           </table>
         </div>
         <div class="my-5 row justify-content-center">
-          <v-form ref="form" class="col-md-6" v-slot="{ errors }">
-            {{ errors }}
+          <v-form
+            ref="form"
+            class="col-md-6"
+            v-slot="{ errors, isSubmitting }"
+            @submit="createOrder"
+          >
             <div class="mb-3">
               <label for="email" class="form-label">Email</label>
               <v-field
                 id="email"
-                name="email"
+                name="Email"
                 type="email"
                 class="form-control"
-                :class="{ 'is-invalid': errors['email'] }"
+                :class="{ 'is-invalid': errors['Email']}"
+                v-model="user.email"
                 placeholder="請輸入 Email"
-                rules="required"
+                rules="required|email"
               ></v-field>
               <error-message
-                name="email"
+                name="Email"
                 class="invalid-feedback"
               ></error-message>
             </div>
@@ -229,6 +234,7 @@ https://cdn.jsdelivr.net/npm/vue-loading-overlay@6/dist/css/index.css
                 :class="{ 'is-invalid': errors['姓名'] }"
                 placeholder="請輸入姓名"
                 rules="required"
+                v-model="user.name"
               ></v-field>
               <error-message
                 name="姓名"
@@ -237,21 +243,43 @@ https://cdn.jsdelivr.net/npm/vue-loading-overlay@6/dist/css/index.css
             </div>
 
             <div class="mb-3">
-              <label for="tel" class="form-label">收件人電話</label>
+              <label for="phone" class="form-label">收件人手機</label>
               <v-field
                 id="tel"
-                name="電話"
+                name="手機"
                 type="text"
                 class="form-control"
-                :class="{ 'is-invalid': errors['電話'] }"
-                placeholder="請輸入電話"
+                :class="{ 'is-invalid': errors['手機'] }"
+                placeholder="請輸入手機"
+                :rules="isPhone"
+                v-model="user.tel"
               ></v-field>
               <error-message
-                name="電話"
+                name="手機"
                 class="invalid-feedback"
               ></error-message>
             </div>
-
+            <div class="mb-3">
+              <label for="city" class="form-label">地區</label>
+              <v-field
+                id="name"
+                name="地區"
+                class="form-control"
+                :class="{ 'is-invalid': errors['地區'] }"
+                placeholder="請輸入地區"
+                rules="required"
+                as="select"
+                v-model="user.city"
+              >
+                <option value="">請選擇地區</option>
+                <option value="台北市">台北市</option>
+                <option value="高雄市">高雄市</option>
+              </v-field>
+              <error-message
+                name="Email"
+                class="invalid-feedback"
+              ></error-message>
+            </div>
             <div class="mb-3">
               <label for="address" class="form-label">收件人地址</label>
               <v-field
@@ -262,6 +290,7 @@ https://cdn.jsdelivr.net/npm/vue-loading-overlay@6/dist/css/index.css
                 :class="{ 'is-invalid': errors['地址'] }"
                 placeholder="請輸入地址"
                 rules="required"
+                v-model="user.address"
               ></v-field>
               <error-message
                 name="地址"
@@ -276,10 +305,13 @@ https://cdn.jsdelivr.net/npm/vue-loading-overlay@6/dist/css/index.css
                 class="form-control"
                 cols="30"
                 rows="10"
+                v-model="message"
               ></textarea>
             </div>
             <div class="text-end">
-              <button type="submit" class="btn btn-danger">送出訂單</button>
+              <button type="submit" class="btn btn-danger" @click="createOrder">
+                送出訂單
+              </button>
             </div>
           </v-form>
         </div>

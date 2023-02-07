@@ -1,15 +1,5 @@
-// 產品列表 ✓
-// 單一產品細節 ✓
-// 加入購物車 ✓
-// 購物車列表 ✓
-// 刪除購物車項目（單一、全部） ✓
-// 調整購物車產品數量 ✓
-// vue-loading ✓
-// 結帳付款
-
 import config from "./config.js";
 import useProductModal from "./userProductModal.js";
-// import loading from "./vueLoading.js";
 const app = Vue.createApp({
   data() {
     return {
@@ -23,6 +13,9 @@ const app = Vue.createApp({
       },
       productId: "",
       cart: {},
+      user: {},
+      message: "",
+      sendButtonDisabled: true,
     };
   },
   components: {
@@ -36,32 +29,16 @@ const app = Vue.createApp({
         .then((res) => {
           this.products = res.data.products;
           this.isLoading = false;
-          console.log(res);
         })
         .catch((err) => {
           alert(`${err.data.message}`);
         });
     },
-    openModal(id) {
-      this.loadingStatus.loadingItem = id;
-      this.productId = id;
-      console.log("productId 外層傳入", id);
+    openModal(content) {
+      this.loadingStatus.loadingItem = content.id;
+      this.tempProduct = content;
+      this.productId = content.id;
     },
-    // 取得單筆商品資訊
-    // getProductItem(id) {
-    //   // 將商品id寫入讀取狀態內容
-    //   this.loadingStatus.loadingItem = id;
-    //   axios
-    //     .get(`${config.url}/api/${config.path}/product/${id}`)
-    //     .then((res) => {
-    //       this.loadingStatus.loadingItem = "";
-    //       this.tempProduct = res.data.product;
-    //       this.$refs.modal.openModal(id);
-    //     })
-    //     .catch((err) => {
-    //       alert(`${err.data.message}`);
-    //     });
-    // },
     // 加入購物車
     addCart(content, qty = 1) {
       this.loadingStatus.loadingItem = content.id;
@@ -94,7 +71,6 @@ const app = Vue.createApp({
         .get(`${config.url}/api/${config.path}/cart`)
         .then((res) => {
           this.cart = res.data.data;
-          console.log(res);
         })
         .catch((err) => {
           alert(`${err.data.message}`);
@@ -103,13 +79,10 @@ const app = Vue.createApp({
     // 刪除單筆購物車
     async deleteCartItem(content) {
       this.loadingStatus.loadingItem = content.id;
-      console.log("content", content);
       try {
-        // console.log(1);
         const res = await axios.delete(
           `${config.url}/api/${config.path}/cart/${content.id}`
         );
-        // console.log(2);
         this.loadingStatus.loadingItem = "";
         await this.getCartList();
         const {
@@ -117,7 +90,6 @@ const app = Vue.createApp({
           product: { title },
         } = content;
         const { message } = res.data;
-        // console.log(3);
         alert(`${title} ${message}`);
       } catch (err) {
         alert(`${err.data.message}`);
@@ -128,14 +100,11 @@ const app = Vue.createApp({
       const dialog = confirm("確定清除購物車嗎？");
       if (dialog) {
         try {
-          // console.log(1);
           const res = await axios.delete(
             `${config.url}/api/${config.path}/carts`
           );
-          // console.log(2);
           await this.getCartList();
           const { message } = res.data;
-          // // console.log(3);
           setTimeout(() => {
             alert(`${message} 購物車`);
           }, 500);
@@ -146,7 +115,6 @@ const app = Vue.createApp({
     },
     // 修改購物車數量
     async updateCart(content) {
-      //   console.log(content.id, content.product_id, qty);
       this.loadingStatus.loadingItem = content.id;
       try {
         const res = await axios.put(
@@ -169,15 +137,32 @@ const app = Vue.createApp({
         alert(`${err.data.message}`);
       }
     },
-    async viewProduct(id) {
-      //   console.log(1);
-      await this.getProductItem(id);
-      console.log(Object.keys(this.tempProduct).length > 1);
-      // if (Object.keys(this.tempProduct).length > 1) {
-      //   this.$refs.modal.openModal();
-      // }
-      //   console.log(2);
-      //   console.log(3);
+    isPhone(value) {
+      console.log("val", value);
+      const phoneNumber = /^(09)[0-9]{8}$/;
+      return phoneNumber.test(value) ? true : "請填入正確的手機號碼";
+    },
+    // 建立訂單
+    createOrder() {
+      axios
+        .post(`${config.url}/api/${config.path}/order`, {
+          data: {
+            user: this.user,
+            message: this.message,
+          },
+        })
+        .then((res) => {
+          //解構賦值
+          // 送出後會出現購物車無資料
+          const { message, orderId } = res.data;
+          console.log("rrr", res);
+          // alert(` ${message} ，訂單編號 ${orderId}`);
+          this.$refs.form.resetForm();
+          this.getCartList();
+        })
+        .catch((err) => {
+          alert(`${err.data.message}`);
+        });
     },
   },
   mounted() {
@@ -186,18 +171,20 @@ const app = Vue.createApp({
     this.getCartList();
   },
 });
-console.log(VueLoading);
-// app.use(VueLoading.LoadingPlugin);
 app.component("loading", VueLoading.Component);
 app.component("VForm", VeeValidate.Form);
 app.component("VField", VeeValidate.Field);
 app.component("ErrorMessage", VeeValidate.ErrorMessage);
 
+// 定義規則
+// 全部加入(CDN 版本)
 Object.keys(VeeValidateRules).forEach((rule) => {
   if (rule !== "default") {
     VeeValidate.defineRule(rule, VeeValidateRules[rule]);
   }
 });
+
+// 加入多國語系
 VeeValidateI18n.loadLocaleFromURL("./locale/zh_TW.json");
 VeeValidate.configure({
   generateMessage: VeeValidateI18n.localize("zh_TW"),

@@ -40,7 +40,7 @@ export default {
   watch: {
     // 監聽外層傳進來的 id
     id() {
-      console.log("productModal id", this.id, this.loadingStatus);
+      // 取得單筆商品資訊;
       axios
         .get(`${config.url}/api/${config.path}/product/${this.id}`)
         .then((res) => {
@@ -78,7 +78,6 @@ export default {
                             <del class="h6">原價 {{ tempContent.origin_price }} 元</del>
                             <div class="h5">現在只要 {{ tempContent.price }} 元</div>
                             <div>
-                                <!-- 加入購物車 數量 待執行-->
                                 <div class="input-group">
                                     <input type="number" class="form-control" min="1" v-model.number="qty">
                                     <button type="button" class="btn btn-primary" @click="addCart(tempContent, qty)">加入購物車</button>
