@@ -13,8 +13,15 @@ const app = Vue.createApp({
       },
       productId: "",
       cart: {},
-      user: {},
-      message: "",
+      form: {
+        user: {
+          name: "",
+          email: "",
+          tel: "",
+          address: "",
+        },
+        message: "",
+      },
       sendButtonDisabled: true,
     };
   },
@@ -138,25 +145,20 @@ const app = Vue.createApp({
       }
     },
     isPhone(value) {
-      console.log("val", value);
       const phoneNumber = /^(09)[0-9]{8}$/;
       return phoneNumber.test(value) ? true : "請填入正確的手機號碼";
     },
     // 建立訂單
     createOrder() {
+      const order = this.form;
       axios
         .post(`${config.url}/api/${config.path}/order`, {
-          data: {
-            user: this.user,
-            message: this.message,
-          },
+          data: order,
         })
         .then((res) => {
           //解構賦值
-          // 送出後會出現購物車無資料
           const { message, orderId } = res.data;
-          console.log("rrr", res);
-          // alert(` ${message} ，訂單編號 ${orderId}`);
+          alert(` ${message} ，訂單編號 ${orderId}`);
           this.$refs.form.resetForm();
           this.getCartList();
         })

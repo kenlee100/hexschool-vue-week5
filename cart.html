@@ -214,7 +214,7 @@ https://cdn.jsdelivr.net/npm/vue-loading-overlay@6/dist/css/index.css
                 type="email"
                 class="form-control"
                 :class="{ 'is-invalid': errors['Email']}"
-                v-model="user.email"
+                v-model="form.user.email"
                 placeholder="請輸入 Email"
                 rules="required|email"
               ></v-field>
@@ -234,7 +234,7 @@ https://cdn.jsdelivr.net/npm/vue-loading-overlay@6/dist/css/index.css
                 :class="{ 'is-invalid': errors['姓名'] }"
                 placeholder="請輸入姓名"
                 rules="required"
-                v-model="user.name"
+                v-model="form.user.name"
               ></v-field>
               <error-message
                 name="姓名"
@@ -252,7 +252,7 @@ https://cdn.jsdelivr.net/npm/vue-loading-overlay@6/dist/css/index.css
                 :class="{ 'is-invalid': errors['手機'] }"
                 placeholder="請輸入手機"
                 :rules="isPhone"
-                v-model="user.tel"
+                v-model="form.user.tel"
               ></v-field>
               <error-message
                 name="手機"
@@ -269,7 +269,7 @@ https://cdn.jsdelivr.net/npm/vue-loading-overlay@6/dist/css/index.css
                 placeholder="請輸入地區"
                 rules="required"
                 as="select"
-                v-model="user.city"
+                v-model="form.user.city"
               >
                 <option value="">請選擇地區</option>
                 <option value="台北市">台北市</option>
@@ -290,7 +290,7 @@ https://cdn.jsdelivr.net/npm/vue-loading-overlay@6/dist/css/index.css
                 :class="{ 'is-invalid': errors['地址'] }"
                 placeholder="請輸入地址"
                 rules="required"
-                v-model="user.address"
+                v-model="form.user.address"
               ></v-field>
               <error-message
                 name="地址"
@@ -305,13 +305,11 @@ https://cdn.jsdelivr.net/npm/vue-loading-overlay@6/dist/css/index.css
                 class="form-control"
                 cols="30"
                 rows="10"
-                v-model="message"
+                v-model="form.message"
               ></textarea>
             </div>
             <div class="text-end">
-              <button type="submit" class="btn btn-danger" @click="createOrder">
-                送出訂單
-              </button>
+              <button type="submit" class="btn btn-danger">送出訂單</button>
             </div>
           </v-form>
         </div>
