@@ -160,6 +160,15 @@ const app = Vue.createApp({
           const { message, orderId } = res.data;
           alert(` ${message} ，訂單編號 ${orderId}`);
           this.$refs.form.resetForm();
+          this.form = {
+            user: {
+              name: "",
+              email: "",
+              tel: "",
+              address: "",
+            },
+            message: "",
+          };
           this.getCartList();
         })
         .catch((err) => {
