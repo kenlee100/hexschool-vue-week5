@@ -1,8 +1,11 @@
-import config from "./config.js";
+import config from './config.js';
 export default {
   data() {
     return {
       modal: {},
+      tempContent: {
+        imagesUrl: [],
+      },
       qty: 1, // 初始數量變數
     };
   },
@@ -10,28 +13,19 @@ export default {
   props: {
     id: {
       type: String,
-      default: "",
+      default: '',
     },
-    tempContent: {
-      type: Object,
-      default: {
-        imagesUrl: [],
-      },
-    },
+
     addCart: {
       type: Function,
       default() {},
     },
-    loadingStatus: {
-      type: Object,
-      default: {},
+    openModal: {
+      type: Function,
+      default() {},
     },
   },
   methods: {
-    // 給外層用
-    openModal() {
-      this.modal.show();
-    },
     // 給外層用
     closeModal() {
       this.modal.hide();
@@ -41,17 +35,17 @@ export default {
     // 監聽外層傳進來的 id
     id() {
       // 取得單筆商品資訊;
-      axios
-        .get(`${config.url}/api/${config.path}/product/${this.id}`)
-        .then((res) => {
-          // 清除外層讀取狀態id
-          this.loadingStatus.loadingItem = "";
-          this.tempProduct = res.data.product;
-          this.modal.show();
-        })
-        .catch((err) => {
-          alert(`${err.data.message}`);
-        });
+      if (this.id) {
+        axios
+          .get(`${config.url}/api/${config.path}/product/${this.id}`)
+          .then((res) => {
+            this.tempContent = res.data.product;
+            this.modal.show();
+          })
+          .catch((err) => {
+            alert(`${err.data.message}`);
+          });
+      }
     },
   },
   template: `
@@ -68,7 +62,9 @@ export default {
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-sm-6">
-                            <img class="img-fluid" :src="tempContent.imageUrl" alt="">
+                            <img v-if="tempContent.imageUrl" class="img-fluid" :src="tempContent.imageUrl" alt="">
+                            <img v-else class="img-fluid" src="https://placehold.co/640x480?text=No+Photo" alt="">
+
                         </div>
                         <div class="col-sm-6">
                             <span class="badge bg-primary rounded-pill">{{ tempContent.category  }}</span>
@@ -92,8 +88,15 @@ export default {
         </div>
     `,
   mounted() {
+    // 當modal關閉時的事件
+    this.$refs.modal.addEventListener('hidden.bs.modal', () => {
+      // 將數量設為 1，避免設定數量，在關閉modal後又再次開啟modal時，顯示上一個數量
+      this.qty = 1;
+      // 設定modal id為空
+      this.openModal('');
+    });
     this.modal = new bootstrap.Modal(this.$refs.modal, {
-      backdrop: "static",
+      backdrop: 'static',
       keyboard: false,
     });
   },
