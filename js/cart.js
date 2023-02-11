@@ -1,26 +1,28 @@
-import config from "./config.js";
-import useProductModal from "./userProductModal.js";
+import config from './config.js';
+import useProductModal from './userProductModal.js';
 const app = Vue.createApp({
   data() {
     return {
       isLoading: false,
+      // 讀取狀態，使用id 判斷 讀取狀態效果顯示與隱藏
       loadingStatus: {
-        loadingItem: "",
+        loadingItem: '',
       },
       products: [],
       tempProduct: {
         imagesUrl: [],
       },
-      productId: "",
+      productId: '',
       cart: {},
       form: {
         user: {
-          name: "",
-          email: "",
-          tel: "",
-          address: "",
+          name: '',
+          email: '',
+          tel: '',
+          address: '',
+          city: '',
         },
-        message: "",
+        message: '',
       },
       sendButtonDisabled: true,
     };
@@ -41,13 +43,15 @@ const app = Vue.createApp({
           alert(`${err.data.message}`);
         });
     },
-    openModal(content) {
-      this.loadingStatus.loadingItem = content.id;
-      this.tempProduct = content;
-      this.productId = content.id;
+    openModal(id) {
+      // id為外層帶入 productId
+      // 將 id 帶入 讀取狀態
+      this.loadingStatus.loadingItem = id;
+      this.productId = id;
     },
     // 加入購物車
     addCart(content, qty = 1) {
+      // 賦予讀取狀態id
       this.loadingStatus.loadingItem = content.id;
       axios
         .post(`${config.url}/api/${config.path}/cart`, {
@@ -57,7 +61,8 @@ const app = Vue.createApp({
           },
         })
         .then((res) => {
-          this.loadingStatus.loadingItem = "";
+          // 將讀取狀態清空
+          this.loadingStatus.loadingItem = '';
           //解構賦值
           const {
             message,
@@ -85,12 +90,14 @@ const app = Vue.createApp({
     },
     // 刪除單筆購物車
     async deleteCartItem(content) {
+      // 賦予讀取狀態id
       this.loadingStatus.loadingItem = content.id;
       try {
         const res = await axios.delete(
           `${config.url}/api/${config.path}/cart/${content.id}`
         );
-        this.loadingStatus.loadingItem = "";
+        // 將讀取狀態清空
+        this.loadingStatus.loadingItem = '';
         await this.getCartList();
         const {
           // 取出內層的資料
@@ -104,7 +111,7 @@ const app = Vue.createApp({
     },
     // 清除購物車
     async clearCartItem() {
-      const dialog = confirm("確定清除購物車嗎？");
+      const dialog = confirm('確定清除購物車嗎？');
       if (dialog) {
         try {
           const res = await axios.delete(
@@ -122,6 +129,7 @@ const app = Vue.createApp({
     },
     // 修改購物車數量
     async updateCart(content) {
+      // 賦予讀取狀態id
       this.loadingStatus.loadingItem = content.id;
       try {
         const res = await axios.put(
@@ -133,7 +141,8 @@ const app = Vue.createApp({
             },
           }
         );
-        this.loadingStatus.loadingItem = "";
+        // 將讀取狀態清空
+        this.loadingStatus.loadingItem = '';
         await this.getCartList();
         const {
           // 取出內層的資料
@@ -146,11 +155,12 @@ const app = Vue.createApp({
     },
     isPhone(value) {
       const phoneNumber = /^(09)[0-9]{8}$/;
-      return phoneNumber.test(value) ? true : "請填入正確的手機號碼";
+      return phoneNumber.test(value) ? true : '請填入正確的手機號碼';
     },
     // 建立訂單
     createOrder() {
       const order = this.form;
+
       axios
         .post(`${config.url}/api/${config.path}/order`, {
           data: order,
@@ -159,17 +169,19 @@ const app = Vue.createApp({
           //解構賦值
           const { message, orderId } = res.data;
           alert(` ${message} ，訂單編號 ${orderId}`);
+          // VeeValidate 的方法
           this.$refs.form.resetForm();
-          this.form = {
+          (this.form = {
             user: {
-              name: "",
-              email: "",
-              tel: "",
-              address: "",
+              name: '',
+              email: '',
+              tel: '',
+              address: '',
+              city: '',
             },
-            message: "",
-          };
-          this.getCartList();
+            message: '',
+          }),
+            this.getCartList();
         })
         .catch((err) => {
           alert(`${err.data.message}`);
@@ -182,24 +194,25 @@ const app = Vue.createApp({
     this.getCartList();
   },
 });
-app.component("loading", VueLoading.Component);
-app.component("VForm", VeeValidate.Form);
-app.component("VField", VeeValidate.Field);
-app.component("ErrorMessage", VeeValidate.ErrorMessage);
+app.component('loading', VueLoading.Component);
+app.component('VForm', VeeValidate.Form);
+app.component('VField', VeeValidate.Field);
+app.component('ErrorMessage', VeeValidate.ErrorMessage);
+console.log('VeeValidate', VeeValidate);
 
 // 定義規則
 // 全部加入(CDN 版本)
 Object.keys(VeeValidateRules).forEach((rule) => {
-  if (rule !== "default") {
+  if (rule !== 'default') {
     VeeValidate.defineRule(rule, VeeValidateRules[rule]);
   }
 });
 
 // 加入多國語系
-VeeValidateI18n.loadLocaleFromURL("./locale/zh_TW.json");
+VeeValidateI18n.loadLocaleFromURL('./locale/zh_TW.json');
 VeeValidate.configure({
-  generateMessage: VeeValidateI18n.localize("zh_TW"),
+  generateMessage: VeeValidateI18n.localize('zh_TW'),
   validateOnInput: true, // 調整為：輸入文字時，就立即進行驗證
 });
 
-app.mount("#app");
+app.mount('#app');
